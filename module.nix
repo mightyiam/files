@@ -147,6 +147,11 @@
             ])
             lib.concatLines
           ];
+
+          derivationArgs = {
+            allowSubstitutes = false;
+            preferLocalBuild = true;
+          };
         };
 
         checks = lib.pipe cfg.files [
@@ -165,7 +170,7 @@
                         (pkgs.writeText "flake-files-file")
                       ];
                 in
-                pkgs.runCommand "flake-file-check"
+                pkgs.runCommandLocal "flake-file-check"
                   {
                     nativeBuildInputs = [ pkgs.difftastic ];
                   }

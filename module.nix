@@ -129,7 +129,7 @@
       config = {
         files.writer.drv = pkgs.writeShellApplication {
           name = psArgs.config.files.writer.exeFilename;
-          runtimeInputs = [ pkgs.git ];
+          runtimeInputs = [ pkgs.gitMinimal ];
           text = lib.pipe cfg.files [
             (map (
               { path_, drv }:

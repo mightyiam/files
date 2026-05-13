@@ -15,17 +15,6 @@
         "type": "github"
       }
     },
-    "files": {
-      "locked": {
-        "path": "..",
-        "type": "path"
-      },
-      "original": {
-        "path": "..",
-        "type": "path"
-      },
-      "parent": []
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -145,7 +134,6 @@
     "root": {
       "inputs": {
         "dedupe_flake-compat": "dedupe_flake-compat",
-        "files": "files",
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
         "import-tree": "import-tree",

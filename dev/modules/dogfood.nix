@@ -1,10 +1,9 @@
-{ inputs, ... }:
 {
-  imports = [ inputs.files.flakeModules.default ];
+  imports = [ ../../flake-module.nix ];
 
   perSystem = psArgs: {
-    treefmt.projectRoot = inputs.files;
-    files.gitToplevel = inputs.files;
+    treefmt.projectRoot = ../..;
+    files.gitToplevel = ../..;
     make-shells.default.packages = [ psArgs.config.files.writer.drv ];
   };
 }

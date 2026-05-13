@@ -19,7 +19,7 @@
           }
         },
         {
-          "run": "nix flake --accept-flake-config check --print-build-logs"
+          "run": "nix flake --accept-flake-config check --print-build-logs --keep-going"
         }
       ]
     }

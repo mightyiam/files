@@ -18,13 +18,18 @@ in
               steps = [
                 { uses = "actions/checkout@v4"; }
                 {
-                  uses = "DeterminateSystems/nix-installer-action@main";
-                  "with".extra-conf = ''
+                  uses = "nixbuild/nix-quick-install-action@master";
+                  "with".nix_conf = ''
                     extra-experimental-features = recursive-nix
                     extra-system-features = recursive-nix
+                    keep-env-derivations = true
+                    keep-outputs = true
                   '';
                 }
-                { uses = "DeterminateSystems/magic-nix-cache-action@main"; }
+                {
+                  uses = "nix-community/cache-nix-action@main";
+                  "with".primary-key = "a-single-key";
+                }
                 { run = "nix flake --accept-flake-config check --print-build-logs"; }
               ];
             };

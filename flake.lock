@@ -1,6 +1,7 @@
 {
   "nodes": {
-    "dedupe_flake-compat": {
+    "flake-compat": {
+      "flake": false,
       "locked": {
         "lastModified": 1767039857,
         "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
@@ -69,9 +70,7 @@
     },
     "make-shell": {
       "inputs": {
-        "flake-compat": [
-          "dedupe_flake-compat"
-        ]
+        "flake-compat": "flake-compat"
       },
       "locked": {
         "lastModified": 1733933815,
@@ -105,7 +104,6 @@
     },
     "root": {
       "inputs": {
-        "dedupe_flake-compat": "dedupe_flake-compat",
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
         "import-tree": "import-tree",

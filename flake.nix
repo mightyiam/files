@@ -23,7 +23,7 @@
 
     make-shell = {
       url = "github:nicknovitski/make-shell";
-      inputs.flake-compat.follows = "dedupe_flake-compat";
+      flake = false;
     };
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -34,11 +34,6 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-  };
-
-  # _additional_ `inputs` only for deduplication
-  inputs = {
-    dedupe_flake-compat.url = "github:edolstra/flake-compat";
   };
 
   outputs =

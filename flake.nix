@@ -16,7 +16,10 @@
       flake = false;
     };
 
-    import-tree.url = "github:vic/import-tree";
+    import-tree = {
+      url = "github:vic/import-tree";
+      flake = false;
+    };
 
     make-shell = {
       url = "github:nicknovitski/make-shell";
@@ -43,5 +46,5 @@
     inputs.flake-parts.lib.mkFlake {
       inherit inputs;
       specialArgs.projectRoot = ./.;
-    } (inputs.import-tree ./modules);
+    } ((import inputs.import-tree) ./modules);
 }

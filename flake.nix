@@ -1,5 +1,5 @@
 {
   outputs = inputs: {
-    flakeModules.default = ./module.nix;
+    flakeModules.default = ./flake-module.nix;
   };
 }

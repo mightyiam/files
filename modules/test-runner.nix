@@ -26,7 +26,7 @@
                   {
                     inputs = {
                       files = {
-                        url = "${../..}";
+                        url = "${self}";
                         flake = false;
                       };
                       flake-parts = {

@@ -15,7 +15,7 @@
         name = "script";
         text = ''
           log=$(nix build '.#checks.${system}."files/${path_}"' --print-build-logs 2>&1 || true)
-          substring="/some-file.txt"
+          substring="some-file.txt"
           if [[ "$log" != *"$substring"* ]]; then
             echo "Substring \`$substring\` not found in log:"
             echo

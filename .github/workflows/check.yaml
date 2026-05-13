@@ -7,16 +7,19 @@
           "uses": "actions/checkout@v4"
         },
         {
-          "uses": "DeterminateSystems/nix-installer-action@main",
+          "uses": "nixbuild/nix-quick-install-action@master",
           "with": {
-            "extra-conf": "extra-experimental-features = recursive-nix\nextra-system-features = recursive-nix\n"
+            "nix_conf": "extra-experimental-features = recursive-nix\nextra-system-features = recursive-nix\nkeep-env-derivations = true\nkeep-outputs = true\n"
           }
         },
         {
-          "uses": "DeterminateSystems/magic-nix-cache-action@main"
+          "uses": "nix-community/cache-nix-action@main",
+          "with": {
+            "primary-key": "a-single-key"
+          }
         },
         {
-          "run": "nix flake --accept-flake-config check ./dev --print-build-logs"
+          "run": "nix flake --accept-flake-config check --print-build-logs --keep-going"
         }
       ]
     }

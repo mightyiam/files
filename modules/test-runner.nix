@@ -25,7 +25,10 @@
                 ''
                   {
                     inputs = {
-                      files.url = "${inputs.files}";
+                      files = {
+                        url = "${self}";
+                        flake = false;
+                      };
                       flake-parts = {
                         url = "${inputs.flake-parts}";
                         inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -38,7 +41,7 @@
                       inputs.flake-parts.lib.mkFlake { inherit inputs; } {
                         systems = import inputs.systems;
                         imports = [
-                          inputs.files.flakeModules.default
+                          (inputs.files + "/flake-module.nix")
                           ./module.nix
                         ];
                       };

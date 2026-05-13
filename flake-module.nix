@@ -43,7 +43,7 @@
                 ''
                   [
                     {
-                      path_ = "README.md";
+                      path = "README.md";
                       drv =
                         pkgs.writeText "README.md"
                           # markdown
@@ -54,7 +54,7 @@
                           ''';
                     }
                     {
-                      path_ = ".gitignore";
+                      path = ".gitignore";
                       drv = pkgs.writeText "gitignore" '''
                         result
                       ''';
@@ -64,7 +64,7 @@
             type = lib.types.listOf (
               lib.types.submodule {
                 options = {
-                  path_ = lib.mkOption {
+                  path = lib.mkOption {
                     type = lib.types.str;
                     description = ''
                       File path relative to Git top-level.
@@ -132,11 +132,11 @@
           runtimeInputs = [ pkgs.gitMinimal ];
           text = lib.pipe cfg.files [
             (map (
-              { path_, drv }:
+              { path, drv }:
               ''
-                dir=$(dirname ${path_})
+                dir=$(dirname ${path})
                 mkdir -p "$dir"
-                cat ${drv} > ${lib.escapeShellArg path_}
+                cat ${drv} > ${lib.escapeShellArg path}
               ''
             ))
             (lib.concat [
@@ -151,14 +151,14 @@
 
         checks = lib.pipe cfg.files [
           (map (
-            { path_, drv }:
+            { path, drv }:
             {
-              name = "files/${path_}";
+              name = "files/${path}";
               value =
                 let
                   file =
                     lib.pipe
-                      [ cfg.gitToplevel "/" path_ ]
+                      [ cfg.gitToplevel "/" path ]
                       [
                         lib.concatStrings
                         lib.readFile

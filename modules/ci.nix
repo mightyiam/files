@@ -1,5 +1,5 @@
 let
-  path_ = ".github/workflows/check.yaml";
+  path = ".github/workflows/check.yaml";
 in
 {
   perSystem =
@@ -7,7 +7,7 @@ in
     {
       files.files = [
         {
-          inherit path_;
+          inherit path;
           drv = pkgs.writers.writeJSON "gh-actions-workflow-check.yaml" {
             on = {
               push = { };
@@ -18,19 +18,24 @@ in
               steps = [
                 { uses = "actions/checkout@v4"; }
                 {
-                  uses = "DeterminateSystems/nix-installer-action@main";
-                  "with".extra-conf = ''
+                  uses = "nixbuild/nix-quick-install-action@master";
+                  "with".nix_conf = ''
                     extra-experimental-features = recursive-nix
                     extra-system-features = recursive-nix
+                    keep-env-derivations = true
+                    keep-outputs = true
                   '';
                 }
-                { uses = "DeterminateSystems/magic-nix-cache-action@main"; }
-                { run = "nix flake --accept-flake-config check ./dev --print-build-logs"; }
+                {
+                  uses = "nix-community/cache-nix-action@main";
+                  "with".primary-key = "a-single-key";
+                }
+                { run = "nix flake --accept-flake-config check --print-build-logs --keep-going"; }
               ];
             };
           };
         }
       ];
-      treefmt.settings.global.excludes = [ path_ ];
+      treefmt.settings.global.excludes = [ path ];
     };
 }

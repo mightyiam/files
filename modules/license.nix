@@ -2,13 +2,13 @@
   perSystem =
     { pkgs, ... }:
     let
-      path_ = "LICENSE";
+      path = "LICENSE";
     in
     {
-      treefmt.projectRootFile = path_;
+      treefmt.projectRootFile = path;
       files.files = [
         {
-          inherit path_;
+          inherit path;
           drv = pkgs.writeText "LICENSE" ''
             MIT License
 
@@ -35,6 +35,6 @@
         }
       ];
 
-      treefmt.settings.global.excludes = [ path_ ];
+      treefmt.settings.global.excludes = [ path ];
     };
 }

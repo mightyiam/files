@@ -2,14 +2,14 @@
   perSystem =
     psArgs@{ pkgs, ... }:
     let
-      path_ = "foo.txt";
+      path = "foo.txt";
     in
     {
       files = {
         writer.exeFilename = "write-files-please";
         files = [
           {
-            inherit path_;
+            inherit path;
             drv = pkgs.writeText "foo.txt" ''
               Aey Ehs Dee Ehf
             '';
@@ -24,7 +24,7 @@
           text = ''
             nix build .#writer
             ./result/bin/write-files-please
-            git add --intent-to-add ${path_}
+            git add --intent-to-add ${path}
             nix flake check
             declare out
             touch "$out" 

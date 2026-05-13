@@ -4,13 +4,13 @@
     {
       files.files = [
         {
-          path_ = "file-a.txt";
+          path = "file-a.txt";
           drv = pkgs.writeText "file-a.txt" ''
             with some contents
           '';
         }
         {
-          path_ = "file-b";
+          path = "file-b";
           drv = pkgs.writeText "file-b.txt" ''
             with some other contents
           '';

@@ -1,5 +1,5 @@
 let
-  path_ = ".github/workflows/check.yaml";
+  path = ".github/workflows/check.yaml";
 in
 {
   perSystem =
@@ -7,7 +7,7 @@ in
     {
       files.files = [
         {
-          inherit path_;
+          inherit path;
           drv = pkgs.writers.writeJSON "gh-actions-workflow-check.yaml" {
             on = {
               push = { };
@@ -31,6 +31,6 @@ in
           };
         }
       ];
-      treefmt.settings.global.excludes = [ path_ ];
+      treefmt.settings.global.excludes = [ path ];
     };
 }

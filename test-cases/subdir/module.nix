@@ -4,7 +4,7 @@
     {
       files.files = [
         {
-          path_ = "dir/file.txt";
+          path = "dir/file.txt";
           drv = pkgs.writeText "file-in-dir.txt" ''
             Contents match
           '';

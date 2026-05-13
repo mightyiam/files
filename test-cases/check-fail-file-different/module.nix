@@ -4,7 +4,7 @@
     {
       files.files = [
         {
-          path_ = "some-file.txt";
+          path = "some-file.txt";
           drv = pkgs.writeText "some-file.txt" "Some contents";
         }
       ];

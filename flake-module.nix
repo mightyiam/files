@@ -62,14 +62,25 @@
                   ]
                 '';
             type = lib.types.listOf (
-              lib.types.submodule {
+              lib.types.submodule (submoduleArgs: {
                 options = {
+                  path_ = lib.mkOption {
+                    internal = true;
+                    type = lib.types.unspecified;
+                    default = null;
+                  };
                   path = lib.mkOption {
                     type = lib.types.str;
                     description = ''
                       File path relative to Git top-level.
                     '';
                     example = lib.literalExpression ''".github/workflows/check.yaml"'';
+                    apply =
+                      v:
+                      if submoduleArgs.config.path_ == null then
+                        v
+                      else
+                        throw "the `path_` attribute has been renamed to `path`";
                   };
                   drv = lib.mkOption {
                     description = ''
@@ -98,7 +109,7 @@
                         '';
                   };
                 };
-              }
+              })
             );
           };
 
@@ -132,7 +143,7 @@
           runtimeInputs = [ pkgs.gitMinimal ];
           text = lib.pipe cfg.files [
             (map (
-              { path, drv }:
+              { path, drv, ... }:
               ''
                 dir=$(dirname ${path})
                 mkdir -p "$dir"
@@ -151,7 +162,7 @@
 
         checks = lib.pipe cfg.files [
           (map (
-            { path, drv }:
+            { path, drv, ... }:
             {
               name = "files/${path}";
               value =

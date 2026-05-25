@@ -22,7 +22,7 @@
             git add --intent-to-add ${path}
             nix flake check
             declare out
-            touch "$out" 
+            touch "$out"
           '';
         };
       };

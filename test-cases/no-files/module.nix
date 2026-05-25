@@ -7,7 +7,7 @@
         text = ''
           nix flake check
           declare out
-          touch "$out" 
+          touch "$out"
         '';
       };
     };

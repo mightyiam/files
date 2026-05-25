@@ -10,7 +10,7 @@
             exit 1
           fi
           declare out
-          touch "$out" 
+          touch "$out"
         '';
       };
     };

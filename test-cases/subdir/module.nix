@@ -2,14 +2,9 @@
   perSystem =
     psArgs@{ pkgs, ... }:
     {
-      files.files = [
-        {
-          path = "dir/file.txt";
-          drv = pkgs.writeText "file-in-dir.txt" ''
-            Contents match
-          '';
-        }
-      ];
+      files.file."dir/file.txt".text = ''
+        Contents match
+      '';
       packages = {
         writer = psArgs.config.files.writer.drv;
 

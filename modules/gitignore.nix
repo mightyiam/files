@@ -6,15 +6,8 @@
   };
   config = {
     gitignore = "result";
-    perSystem =
-      { pkgs, ... }:
-      {
-        files.files = [
-          {
-            path = ".gitignore";
-            drv = pkgs.writeText ".gitignore" config.gitignore;
-          }
-        ];
-      };
+    perSystem = {
+      files.file.".gitignore".text = config.gitignore;
+    };
   };
 }

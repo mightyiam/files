@@ -1,5 +1,4 @@
 let
-  path = "README.md";
   text = # markdown
     ''
       In-repository file generation flake-parts module
@@ -37,14 +36,7 @@ let
     '';
 in
 {
-  perSystem =
-    { pkgs, ... }:
-    {
-      files.files = [
-        {
-          inherit path;
-          drv = pkgs.writeText "README.md" text;
-        }
-      ];
-    };
+  perSystem = {
+    files.file."README.md".text = text;
+  };
 }

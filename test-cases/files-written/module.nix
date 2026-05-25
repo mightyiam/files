@@ -2,20 +2,14 @@
   perSystem =
     psArgs@{ pkgs, ... }:
     {
-      files.files = [
-        {
-          path = "file-a.txt";
-          drv = pkgs.writeText "file-a.txt" ''
-            with some contents
-          '';
-        }
-        {
-          path = "file-b";
-          drv = pkgs.writeText "file-b.txt" ''
-            with some other contents
-          '';
-        }
-      ];
+      files.file = {
+        "file-a.txt".text = ''
+          with some contents
+        '';
+        "file-b".text = ''
+          with some other contents
+        '';
+      };
       packages = {
         write-files = psArgs.config.files.writer.drv;
 

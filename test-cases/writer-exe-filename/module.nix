@@ -7,14 +7,9 @@
     {
       files = {
         writer.exeFilename = "write-files-please";
-        files = [
-          {
-            inherit path;
-            drv = pkgs.writeText "foo.txt" ''
-              Aey Ehs Dee Ehf
-            '';
-          }
-        ];
+        file.${path}.text = ''
+          Aey Ehs Dee Ehf
+        '';
       };
       packages = {
         writer = psArgs.config.files.writer.drv;

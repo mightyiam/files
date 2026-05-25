@@ -2,12 +2,7 @@
   perSystem =
     { pkgs, ... }:
     {
-      files.files = [
-        {
-          path = "some-file.txt";
-          drv = pkgs.writeText "some-file.txt" "Some contents";
-        }
-      ];
+      files.file."some-file.txt".text = "Some contents";
       packages.default = pkgs.writeShellApplication {
         name = "script";
         text = ''

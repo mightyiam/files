@@ -32,85 +32,65 @@
             example = lib.literalExpression "../.";
           };
 
-          files = lib.mkOption {
+          file = lib.mkOption {
             description = ''
               Files to be written and checked for.
+              The attribute name is the file path relative to Git top-level.
+              Use slashes for subdirectories (e.g. `"diagrams/overview.md"`).
             '';
-            default = [ ];
-            example =
-              lib.literalExpression
-                # nix
-                ''
-                  [
-                    {
-                      path = "README.md";
-                      drv =
-                        pkgs.writeText "README.md"
-                          # markdown
-                          '''
-                            # Practical Project
-
-                            Clear documentation
-                          ''';
-                    }
-                    {
-                      path = ".gitignore";
-                      drv = pkgs.writeText "gitignore" '''
-                        result
-                      ''';
-                    }
-                  ]
-                '';
-            type = lib.types.listOf (
-              lib.types.submodule (submoduleArgs: {
-                options = {
-                  path_ = lib.mkOption {
-                    internal = true;
-                    type = lib.types.unspecified;
-                    default = null;
+            default = { };
+            example = lib.literalExpression ''
+              {
+                "README.md".text = "# My Project";
+                ".gitignore".source = ./gitignore;
+                "docs/guide.md".text = "...";
+              }
+            '';
+            type = lib.types.lazyAttrsOf (
+              lib.types.submodule (
+                submoduleArgs@{ name, ... }:
+                {
+                  options = {
+                    text = lib.mkOption {
+                      type = lib.types.nullOr lib.types.lines;
+                      default = null;
+                      description = ''
+                        Text content of the file.
+                        Sets `source` automatically via `pkgs.writeText`.
+                      '';
+                    };
+                    source = lib.mkOption {
+                      type = lib.types.path;
+                      description = ''
+                        Path or derivation to use as the file content.
+                        Is set automatically when `text` is provided.
+                      '';
+                    };
                   };
-                  path = lib.mkOption {
-                    type = lib.types.str;
-                    description = ''
-                      File path relative to Git top-level.
-                    '';
-                    example = lib.literalExpression ''".github/workflows/check.yaml"'';
-                    apply =
-                      v:
-                      if submoduleArgs.config.path_ == null then
-                        v
-                      else
-                        throw "the `path_` attribute has been renamed to `path`";
-                  };
-                  drv = lib.mkOption {
-                    description = ''
-                      Provide the file as a derivation.
-                      The out path is expected to be a file.
-                      Directory out path not supported;
-                      pull request welcome!
-                    '';
-                    type = lib.types.package;
-                    example =
-                      lib.literalExpression
-                        # nix
-                        ''
-                          pkgs.writers.writeJSON "gh-actions-workflow-check.yaml" {
-                            on.push = { };
-                            jobs.check = {
-                              runs-on = "ubuntu-latest";
-                              steps = [
-                                { uses = "actions/checkout@v4"; }
-                                { uses = "DeterminateSystems/nix-installer-action@main"; }
-                                { uses = "DeterminateSystems/magic-nix-cache-action@main"; }
-                                { run = "nix flake check"; }
-                              ];
-                            };
-                          }
-                        '';
-                  };
-                };
-              })
+                  config.source = lib.mkIf (submoduleArgs.config.text != null) (
+                    pkgs.writeText name submoduleArgs.config.text
+                  );
+                }
+              )
             );
+            apply =
+              v:
+              if cfg.files == null then
+                v
+              else
+                throw ''
+                  `perSystem.files.files` has been replaced with a more idiomatic API. Example:
+
+                  ```nix
+                  perSystem.files.file."docs/foo.md".text = "## contents";
+                  ```
+                '';
+          };
+
+          files = lib.mkOption {
+            internal = true;
+            type = lib.types.nullOr lib.types.unspecified;
+            default = null;
           };
 
           writer = {
@@ -142,13 +122,14 @@
         files.writer.drv = pkgs.writeShellApplication {
           name = psArgs.config.files.writer.exeFilename;
           runtimeInputs = [ pkgs.gitMinimal ];
-          text = lib.pipe cfg.files [
-            (map (
-              { path, drv, ... }:
+          text = lib.pipe cfg.file [
+            (lib.mapAttrsToList (
+              path:
+              { source, ... }:
               ''
                 dir=$(dirname ${path})
                 mkdir -p "$dir"
-                cat ${drv} > ${lib.escapeShellArg path}
+                cat ${source} > ${lib.escapeShellArg path}
               ''
             ))
             (lib.concat [
@@ -166,34 +147,32 @@
           };
         };
 
-        checks = lib.pipe cfg.files [
-          (map (
-            { path, drv, ... }:
-            {
-              name = "files/${path}";
-              value =
-                let
-                  file =
-                    lib.pipe
-                      [ cfg.gitToplevel "/" path ]
-                      [
-                        lib.concatStrings
-                        lib.readFile
-                        (pkgs.writeText "flake-files-file")
-                      ];
-                in
-                pkgs.runCommandLocal "flake-file-check"
-                  {
-                    nativeBuildInputs = [ pkgs.difftastic ];
-                  }
-                  ''
-                    difft --exit-code --display inline ${drv} ${file}
-                    touch $out
-                  '';
-            }
-          ))
-          lib.listToAttrs
-        ];
+        checks = lib.flip lib.mapAttrs' cfg.file (
+          path:
+          { source, ... }:
+          {
+            name = "files/${path}";
+            value =
+              let
+                file =
+                  lib.pipe
+                    [ cfg.gitToplevel "/" path ]
+                    [
+                      lib.concatStrings
+                      lib.readFile
+                      (pkgs.writeText "flake-files-file")
+                    ];
+              in
+              pkgs.runCommandLocal "flake-file-check"
+                {
+                  nativeBuildInputs = [ pkgs.difftastic ];
+                }
+                ''
+                  difft --exit-code --display inline ${source} ${file}
+                  touch $out
+                '';
+          }
+        );
 
         apps = lib.mkIf cfg.writer.app {
           ${cfg.writer.exeFilename} = {

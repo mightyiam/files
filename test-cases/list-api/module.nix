@@ -1,16 +1,8 @@
 {
   perSystem =
     { pkgs, ... }:
-    let
-      path = "some-file.txt";
-    in
     {
-      files.files = [
-        {
-          path_ = path;
-          drv = pkgs.writeText "some-file.txt" "";
-        }
-      ];
+      files.files = [ ];
       packages.default = pkgs.writeShellApplication {
         name = "script";
         text = ''

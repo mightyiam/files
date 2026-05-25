@@ -133,6 +133,7 @@
               type = lib.types.package;
               readOnly = true;
             };
+            app = lib.mkEnableOption "setting up as a flake app";
           };
         };
       };
@@ -193,6 +194,14 @@
           ))
           lib.listToAttrs
         ];
+
+        apps = lib.mkIf cfg.writer.app {
+          ${cfg.writer.exeFilename} = {
+            type = "app";
+            program = lib.getExe cfg.writer.drv;
+            meta.description = "Write all configured files to their paths";
+          };
+        };
       };
     }
   );

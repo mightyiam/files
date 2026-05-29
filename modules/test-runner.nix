@@ -62,24 +62,24 @@
                     extra-experimental-features = nix-command flakes
                   '';
                 }
-                ''
-                  set -o errexit
-                  set -o nounset
-                  set -o pipefail
+                (
+                  pkgs.writers.writeNu dirname
+                    # nu
+                    ''
+                      $env.HOME = (pwd)
 
-                  export HOME="$(pwd)"
-
-                  mkdir test-case
-                  cd test-case
-                  cp ${flake} flake.nix
-                  cp -r ${testCasesDir + "/${dirname}"}/* .
-                  git init .
-                  git add .
-                  git config user.name "test runner"
-                  git config user.email "test@example.com"
-                  git commit -m "some message"
-                  nix run .
-                '';
+                      mkdir test-case
+                      cd test-case
+                      cp ${flake} flake.nix
+                      cp -r ${testCasesDir + "/${dirname}"}/* .
+                      git init .
+                      git add .
+                      git config user.name "test runner"
+                      git config user.email "test@example.com"
+                      git commit -m "some message"
+                      nix run .
+                    ''
+                );
           }
         );
     };

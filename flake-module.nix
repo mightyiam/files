@@ -156,17 +156,29 @@
               pkgs.runCommandLocal "flake-file-check"
                 {
                   nativeBuildInputs = [ pkgs.difftastic ];
-                  env.toplevel = "${cfg.gitToplevel}";
+                  env = {
+                    filePath = "${cfg.gitToplevel + "/${path}"}";
+                    inherit source;
+                  };
                 }
-                ''
-                  existing="$toplevel/${path}"
-                  if [ ! -f "$existing" ]; then
-                    echo "files: ${path} not found — consider running the files writer"
-                    exit 1
-                  fi
-                  difft --exit-code --display inline ${source} "$existing"
-                  touch $out
-                '';
+                (
+                  pkgs.writers.writeNu "flake-file-check"
+                    # nu
+                    ''
+                      if not ($env.filePath | path exists) {
+                        panic $"files: ($env.filePath) not found — consider running the files writer"
+                      }
+
+                      let type = $env.filePath | path type
+
+                      if ($type != 'file') {
+                        panic $"files: ($env.filePath) not a regular file, but a ($type)"
+                      }
+
+                      difft --exit-code --display inline $env.source $env.filePath
+                      touch $env.out
+                    ''
+                );
           }
         );
 

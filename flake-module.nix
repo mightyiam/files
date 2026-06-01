@@ -94,6 +94,20 @@
           };
 
           writer = {
+            filesJson = lib.mkOption {
+              internal = true;
+              type = lib.types.package;
+              default = lib.pipe cfg.file [
+                (lib.mapAttrsToList (
+                  path:
+                  { source, ... }:
+                  {
+                    inherit path source;
+                  }
+                ))
+                (pkgs.writers.writeJSON "files.json")
+              ];
+            };
             exeFilename = lib.mkOption {
               type = lib.types.singleLineStr;
               default = "write-files";
@@ -122,24 +136,19 @@
         files.writer.drv = pkgs.writeShellApplication {
           name = cfg.writer.exeFilename;
           runtimeInputs = [ pkgs.gitMinimal ];
-          text = lib.pipe cfg.file [
-            (lib.mapAttrsToList (
-              path:
-              { source, ... }:
+          runtimeEnv.files = cfg.writer.filesJson;
+
+          text =
+            pkgs.writers.writeNu cfg.writer.exeFilename
+              # nu
               ''
-                dir=$(dirname ${path})
-                mkdir -p "$dir"
-                cat ${source} > ${lib.escapeShellArg path}
-              ''
-            ))
-            (lib.concat [
-              ''
-                toplevel="$(git rev-parse --show-toplevel)"
-                cd "$toplevel"
-              ''
-            ])
-            lib.concatLines
-          ];
+                cd (git rev-parse --show-toplevel)
+
+                for file in (open $env.files) {
+                  mkdir ($file.path | path dirname)
+                  open --raw $file.source | save -f $file.path
+                }
+              '';
 
           derivationArgs = {
             allowSubstitutes = false;

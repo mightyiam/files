@@ -120,7 +120,7 @@
 
       config = {
         files.writer.drv = pkgs.writeShellApplication {
-          name = psArgs.config.files.writer.exeFilename;
+          name = cfg.writer.exeFilename;
           runtimeInputs = [ pkgs.gitMinimal ];
           text = lib.pipe cfg.file [
             (lib.mapAttrsToList (

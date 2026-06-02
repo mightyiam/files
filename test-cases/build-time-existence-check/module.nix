@@ -3,17 +3,15 @@
     { pkgs, system, ... }:
     {
       files.file."some-file.txt".text = "";
-      packages.default = pkgs.writeShellApplication {
-        name = "script";
-        text = ''
-          nix eval '.#checks.${system}."files/some-file.txt"'
+      packages.default =
+        pkgs.writers.writeNuBin "script"
+          # nu
+          ''
+            use std/assert
 
-          if nix flake check --print-build-logs; then
-            exit 1
-          fi
-          declare out
-          touch "$out"
-        '';
-      };
+            nix eval '.#checks.${system}."files/some-file.txt"'
+            assert error { ^nix flake check --print-build-logs }
+            touch $env.out
+          '';
     };
 }

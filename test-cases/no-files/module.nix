@@ -2,13 +2,12 @@
   perSystem =
     { pkgs, ... }:
     {
-      packages.default = pkgs.writeShellApplication {
-        name = "script";
-        text = ''
-          nix flake check
-          declare out
-          touch "$out"
-        '';
-      };
+      packages.default =
+        pkgs.writers.writeNuBin "script"
+          # nu
+          ''
+            nix flake check
+            touch $env.out
+          '';
     };
 }

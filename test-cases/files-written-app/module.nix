@@ -19,16 +19,15 @@
       packages = {
         write-files = psArgs.config.files.writer.drv;
 
-        default = pkgs.writeShellApplication {
-          name = "script";
-          text = ''
-            nix run .#writer-app
-            git add --intent-to-add .
-            nix flake check
-            declare out
-            touch "$out"
-          '';
-        };
+        default =
+          pkgs.writers.writeNuBin "script"
+            #nu
+            ''
+              nix run .#writer-app
+              git add --intent-to-add .
+              nix flake check
+              touch $env.out
+            '';
       };
     };
 }

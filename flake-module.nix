@@ -94,6 +94,20 @@
           };
 
           writer = {
+            filesJson = lib.mkOption {
+              internal = true;
+              type = lib.types.package;
+              default = lib.pipe cfg.file [
+                (lib.mapAttrsToList (
+                  path:
+                  { source, ... }:
+                  {
+                    inherit path source;
+                  }
+                ))
+                (pkgs.writers.writeJSON "files.json")
+              ];
+            };
             exeFilename = lib.mkOption {
               type = lib.types.singleLineStr;
               default = "write-files";
@@ -122,24 +136,19 @@
         files.writer.drv = pkgs.writeShellApplication {
           name = cfg.writer.exeFilename;
           runtimeInputs = [ pkgs.gitMinimal ];
-          text = lib.pipe cfg.file [
-            (lib.mapAttrsToList (
-              path:
-              { source, ... }:
+          runtimeEnv.files = cfg.writer.filesJson;
+
+          text =
+            pkgs.writers.writeNu cfg.writer.exeFilename
+              # nu
               ''
-                dir=$(dirname ${path})
-                mkdir -p "$dir"
-                cat ${source} > ${lib.escapeShellArg path}
-              ''
-            ))
-            (lib.concat [
-              ''
-                toplevel="$(git rev-parse --show-toplevel)"
-                cd "$toplevel"
-              ''
-            ])
-            lib.concatLines
-          ];
+                cd (git rev-parse --show-toplevel)
+
+                for file in (open $env.files) {
+                  mkdir ($file.path | path dirname)
+                  open --raw $file.source | save -f $file.path
+                }
+              '';
 
           derivationArgs = {
             allowSubstitutes = false;
@@ -156,17 +165,29 @@
               pkgs.runCommandLocal "flake-file-check"
                 {
                   nativeBuildInputs = [ pkgs.difftastic ];
-                  env.toplevel = "${cfg.gitToplevel}";
+                  env = {
+                    filePath = "${cfg.gitToplevel + "/${path}"}";
+                    inherit source;
+                  };
                 }
-                ''
-                  existing="$toplevel/${path}"
-                  if [ ! -f "$existing" ]; then
-                    echo "files: ${path} not found — consider running the files writer"
-                    exit 1
-                  fi
-                  difft --exit-code --display inline ${source} "$existing"
-                  touch $out
-                '';
+                (
+                  pkgs.writers.writeNu "flake-file-check"
+                    # nu
+                    ''
+                      if not ($env.filePath | path exists) {
+                        panic $"files: ($env.filePath) not found — consider running the files writer"
+                      }
+
+                      let type = $env.filePath | path type
+
+                      if ($type != 'file') {
+                        panic $"files: ($env.filePath) not a regular file, but a ($type)"
+                      }
+
+                      difft --exit-code --display inline $env.source $env.filePath
+                      touch $env.out
+                    ''
+                );
           }
         );
 

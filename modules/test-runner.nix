@@ -49,7 +49,7 @@
                 '';
           in
           {
-            name = "integration/${dirname}";
+            name = "integration:${dirname}";
             value =
               pkgs.runCommand dirname
                 {

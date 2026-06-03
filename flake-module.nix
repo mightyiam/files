@@ -160,7 +160,7 @@
           path:
           { source, ... }:
           {
-            name = "files/${path}";
+            name = "files:${path}";
             value =
               pkgs.runCommandLocal "flake-file-check"
                 {

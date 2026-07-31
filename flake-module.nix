@@ -135,7 +135,10 @@
       config = {
         files.writer.drv = pkgs.writeShellApplication {
           name = cfg.writer.exeFilename;
-          runtimeInputs = [ pkgs.gitMinimal ];
+          runtimeInputs = [
+            pkgs.diffutils
+            pkgs.gitMinimal
+          ];
           runtimeEnv.files = cfg.writer.filesJson;
 
           text =
@@ -145,8 +148,12 @@
                 cd (git rev-parse --show-toplevel)
 
                 for file in (open $env.files) {
-                  mkdir ($file.path | path dirname)
-                  open --raw $file.source | save -f $file.path
+                  let unchanged = (cmp --silent $file.source $file.path | complete | get exit_code) == 0
+
+                  if not $unchanged {
+                    mkdir ($file.path | path dirname)
+                    open --raw $file.source | save -f $file.path
+                  }
                 }
               '';
 

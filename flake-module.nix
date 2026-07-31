@@ -145,8 +145,14 @@
                 cd (git rev-parse --show-toplevel)
 
                 for file in (open $env.files) {
-                  mkdir ($file.path | path dirname)
-                  open --raw $file.source | save -f $file.path
+                  let changed = not (
+                    ($file.path | path exists) and ((open --raw $file.source) == (open --raw $file.path))
+                  )
+
+                  if $changed {
+                    mkdir ($file.path | path dirname)
+                    open --raw $file.source | save -f $file.path
+                  }
                 }
               '';
 

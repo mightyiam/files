@@ -9,7 +9,7 @@
           ''
             use std/assert
 
-            nix eval '.#checks.${system}."files/some-file.txt"'
+            nix eval '.#checks.${system}."files:some-file.txt"'
             assert error { ^nix flake check --print-build-logs }
             touch $env.out
           '';

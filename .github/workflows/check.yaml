@@ -15,5 +15,7 @@ jobs:
           primary-key: a-single-key
       - run: nix flake --accept-flake-config check --print-build-logs --keep-going
 on:
-  push: {}
+  push:
+    branches: [master]
+  pull_request: {}
   workflow_call: {}

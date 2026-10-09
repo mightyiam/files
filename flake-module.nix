@@ -13,6 +13,10 @@
     {
       options = {
         files = {
+          checks.enable = lib.mkEnableOption "flake checks for configured files" // {
+            default = true;
+          };
+
           gitToplevel = lib.mkOption {
             type = lib.types.path;
             default = self;
@@ -162,39 +166,41 @@
           };
         };
 
-        checks = lib.flip lib.mapAttrs' cfg.file (
-          path:
-          { source, ... }:
-          {
-            name = "files:${path}";
-            value =
-              pkgs.runCommandLocal "flake-file-check"
-                {
-                  nativeBuildInputs = [ pkgs.difftastic ];
-                  env = {
-                    filePath = "${cfg.gitToplevel + "/${path}"}";
-                    inherit source;
-                  };
-                }
-                (
-                  pkgs.writers.writeNu "flake-file-check"
-                    # nu
-                    ''
-                      if not ($env.filePath | path exists) {
-                        panic $"files: ($env.filePath) not found — consider running the files writer"
-                      }
+        checks = lib.mkIf cfg.checks.enable (
+          lib.flip lib.mapAttrs' cfg.file (
+            path:
+            { source, ... }:
+            {
+              name = "files:${path}";
+              value =
+                pkgs.runCommandLocal "flake-file-check"
+                  {
+                    nativeBuildInputs = [ pkgs.difftastic ];
+                    env = {
+                      filePath = "${cfg.gitToplevel + "/${path}"}";
+                      inherit source;
+                    };
+                  }
+                  (
+                    pkgs.writers.writeNu "flake-file-check"
+                      # nu
+                      ''
+                        if not ($env.filePath | path exists) {
+                          panic $"files: ($env.filePath) not found — consider running the files writer"
+                        }
 
-                      let type = $env.filePath | path type
+                        let type = $env.filePath | path type
 
-                      if ($type != 'file') {
-                        panic $"files: ($env.filePath) not a regular file, but a ($type)"
-                      }
+                        if ($type != 'file') {
+                          panic $"files: ($env.filePath) not a regular file, but a ($type)"
+                        }
 
-                      difft --exit-code --display inline $env.source $env.filePath
-                      touch $env.out
-                    ''
-                );
-          }
+                        difft --exit-code --display inline $env.source $env.filePath
+                        touch $env.out
+                      ''
+                  );
+            }
+          )
         );
 
         apps = lib.mkIf cfg.writer.app {
